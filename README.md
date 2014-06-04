@@ -15,7 +15,13 @@ Just add this in your module Gemfile:
 gem 'puppet_standalone_installer_builder', :github => 'camptocamp/puppet_standalone_installer_builder', :branch => 'master', :require => false
 ```
 
-And run
+And this in your Rakefile
+
+```
+require 'puppet_standalone_installer_builder/rake_tasks'
+```
+
+Then run
 
 ```
 bundle update

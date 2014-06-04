@@ -4,6 +4,13 @@ require 'yaml'
 
 task :default => [:help]
 
+desc 'Check if working directory is clean'
+task :check_git_status do
+  fail "You have unstaged changes." unless system("git diff --exit-code")
+  fail "You have changes that are staged but not committed." unless system("git diff --cached --exit-code")
+  fail "You have untracked files." unless system("git ls-files --other --exclude-standard --directory")
+end
+
 desc 'Check if all dependency version is explicitely set'
 task :check_deps_version do
   fixtures = YAML.load_file('.fixtures.yml')
@@ -22,7 +29,7 @@ task :reprepro do
 end
 
 desc "Build the tarball"
-task :build_tarball => [:check_deps_version, :check_tag, :reprepro, :spec_prep, :spec_standalone] do
+task :build_tarball => [:check_git_status, :check_deps_version, :check_tag, :reprepro, :spec_prep, :spec_standalone] do
   profile = File.basename(Dir.pwd)[/^puppet-(.*)$/, 1]
   tarball = "../#{profile}.tar.gz"
   apt_dir = 'packages/apt'

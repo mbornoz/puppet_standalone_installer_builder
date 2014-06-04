@@ -9,10 +9,19 @@ task :reprepro do
   sh "reprepro -b packages/apt export"
 end
 
-desc "Build standalone installer archive"
-task :build_standalone_installer => [:reprepro, :spec_prep, :spec_standalone] do
-  sh "tar cvzfh ../georchestra.tar.gz README.md packages --exclude-from .gitignore --exclude .git --exclude packages/apt/conf --exclude packages/apt/lists --exclude packages/apt/db -C spec/fixtures modules/ --exclude modules/georchestra/spec/fixtures/modules --exclude modules/georchestra/packages"
+desc "Build the tarball"
+task :build_tarball => [:reprepro, :spec_prep, :spec_standalone] do
+  profile = Dir.pwd
+  tarball = "../#{profile}.tar.gz"
+  apt_dir = 'packages/apt'
+
+  sh "tar cvzfh #{tarball} README.md packages --exclude-from .gitignore --exclude .git --exclude #{apt_dir}/conf --exclude #{apt_dir}/lists --exclude #{apt_dir}/db -C spec/fixtures modules/ --exclude modules/#{profile}/spec/fixtures/modules --exclude modules/#{profile}/packages"
+
+  puts "Tarball of module #{profile} built in #{tarball}."
 end
+
+desc "Build standalone installer archive"
+task :build_standalone_installer => [:build_tarball, :spec_clean]
 
 desc "Display the list of available rake tasks"
 task :help do

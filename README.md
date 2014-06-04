@@ -33,7 +33,8 @@ This will produce a tarball a the module and all dependencies.
 Workflow for reproductible build
 --------------------------------
 
-* Branch your module for a specific release version
-* Explicitely set dependencies version in .fixtures.yml
-* Explicitely set gem version in Gemfile
-* Call `bundle update` and `bundle exec rake build_standalone_installer`
+* Branch your module for a specific release version.
+* Use the same builder gem : explicitely set gem version in Gemfile.
+* Use the same puppet modules : explicitely set dependencies version in .fixtures.yml.
+* Use the same packages : use reprepro snapshots features on your repository server, then point to a specific snapshot in your reprepro clone configuration files.
+* Call `bundle update` and `bundle exec rake build_standalone_installer` and you should get reproductible build.

@@ -11,7 +11,7 @@ end
 
 desc "Build the tarball"
 task :build_tarball => [:reprepro, :spec_prep, :spec_standalone] do
-  profile = Dir.pwd
+  profile = File.basename(Dir.pwd)[/^puppet-(.*)$/, 1]
   tarball = "../#{profile}.tar.gz"
   apt_dir = 'packages/apt'
 

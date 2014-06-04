@@ -29,3 +29,11 @@ bundle exec rake build_standalone_installer
 ```
 
 This will produce a tarball a the module and all dependencies.
+
+Workflow for reproductible build
+--------------------------------
+
+* Branch your module for a specific release version
+* Explicitely set dependencies version in .fixtures.yml
+* Explicitely set gem version in Gemfile
+* Call `bundle update` and `bundle exec rake build_standalone_installer`

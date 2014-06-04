@@ -1,6 +1,6 @@
 Gem::Specification.new do |gem|
   gem.name          = 'puppet_standalone_installer_builder'
-  gem.version       = '0.0.2'
+  gem.version       = '0.0.3'
   gem.date          = '2014-06-04'
   gem.summary       = 'Puppet standalone installer builder'
   gem.description   = 'Helps you to build standalone installer for puppet'

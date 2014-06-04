@@ -1,7 +1,14 @@
 require 'rake'
 require 'rspec/core/rake_task'
+require 'yaml'
 
 task :default => [:help]
+
+desc 'Check if all dependency version is explicitely set'
+task :check_deps_version do
+  fixtures = YAML.load_file('.fixtures.yml')
+  fixtures['fixtures']['repositories'].select { |k, v| fail "You must explicitely set ref for module #{k} in .fixtures.yml for a reproductible build." unless v.is_a?(Hash) and v.has_key?('ref') }
+end
 
 desc "Clone the repository"
 task :reprepro do
@@ -10,7 +17,7 @@ task :reprepro do
 end
 
 desc "Build the tarball"
-task :build_tarball => [:reprepro, :spec_prep, :spec_standalone] do
+task :build_tarball => [:check_deps_version, :reprepro, :spec_prep, :spec_standalone] do
   profile = File.basename(Dir.pwd)[/^puppet-(.*)$/, 1]
   tarball = "../#{profile}.tar.gz"
   apt_dir = 'packages/apt'

@@ -10,6 +10,11 @@ task :check_deps_version do
   fixtures['fixtures']['repositories'].select { |k, v| fail "You must explicitely set ref for module #{k} in .fixtures.yml for a reproductible build." unless v.is_a?(Hash) and v.has_key?('ref') }
 end
 
+desc 'Check tag'
+task :check_tag do
+  fail "You must tag the current commit for a reproductible build." unless !`git tag --contains $(git rev-parse HEAD)`.empty?
+end
+
 desc "Clone the repository"
 task :reprepro do
   sh "reprepro -b packages/apt update"
@@ -17,7 +22,7 @@ task :reprepro do
 end
 
 desc "Build the tarball"
-task :build_tarball => [:check_deps_version, :reprepro, :spec_prep, :spec_standalone] do
+task :build_tarball => [:check_deps_version, :check_tag, :reprepro, :spec_prep, :spec_standalone] do
   profile = File.basename(Dir.pwd)[/^puppet-(.*)$/, 1]
   tarball = "../#{profile}.tar.gz"
   apt_dir = 'packages/apt'

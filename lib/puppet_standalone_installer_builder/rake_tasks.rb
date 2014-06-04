@@ -31,7 +31,9 @@ end
 desc "Build the tarball"
 task :build_tarball => [:check_git_status, :check_deps_version, :check_tag, :reprepro, :spec_prep, :spec_standalone] do
   profile = File.basename(Dir.pwd)[/^puppet-(.*)$/, 1]
-  tarball = "../#{profile}.tar.gz"
+  tags = `git tag --contains $(git rev-parse HEAD)`.split("\n")
+  version = tags[0] unless tags.length > 1
+  tarball = "../#{profile}-#{version}.tar.gz"
   apt_dir = 'packages/apt'
 
   sh "tar cvzfh #{tarball} README.md packages --exclude-from .gitignore --exclude .git --exclude #{apt_dir}/conf --exclude #{apt_dir}/lists --exclude #{apt_dir}/db -C spec/fixtures modules/ --exclude modules/#{profile}/spec/fixtures/modules --exclude modules/#{profile}/packages"

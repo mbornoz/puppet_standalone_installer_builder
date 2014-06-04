@@ -7,7 +7,7 @@ task :default => [:help]
 desc 'Check if all dependency version is explicitely set'
 task :check_deps_version do
   fixtures = YAML.load_file('.fixtures.yml')
-  fixtures['fixtures']['repositories'].select { |k, v| fail "You must explicitely set ref for module #{k} in .fixtures.yml for a reproductible build." unless v.is_a?(Hash) and v.has_key?('ref') }
+  fixtures['fixtures']['repositories'].select { |k, v| fail "You must explicitely set ref for module #{k} in .fixtures.yml for a reproductible build." unless v.is_a?(Hash) and v.has_key?('ref') and !v['ref'].nil? }
 end
 
 desc 'Check tag'

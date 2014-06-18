@@ -4,6 +4,11 @@ require 'yaml'
 
 task :default => [:help]
 
+desc 'Check if we are not working in master'
+task :check_not_in_master do
+  fail "You must work in a branch other than master." unless `git rev-parse --abbrev-ref HEAD`.strip != 'master'
+end
+
 desc 'Check if working directory is clean'
 task :check_git_status do
   fail "You have unstaged changes." unless system("git diff --exit-code")
@@ -22,6 +27,9 @@ task :check_tag do
   fail "You must tag the current commit for a reproductible build." unless !`git tag --contains $(git rev-parse HEAD)`.empty?
 end
 
+desc 'Check pre-requirements'
+task :build_check => [:check_not_in_master, :check_git_status, :check_deps_version, :check_tag]
+
 desc "Clone the repository"
 task :reprepro do
   sh "reprepro -b packages/apt update"
@@ -29,7 +37,7 @@ task :reprepro do
 end
 
 desc "Build the tarball"
-task :build_tarball => [:check_git_status, :check_deps_version, :check_tag, :reprepro, :spec_prep, :spec_standalone] do
+task :build_tarball => [:build_check, :reprepro, :spec_prep, :spec_standalone] do
   profile = File.basename(Dir.pwd)[/^puppet-(.*)$/, 1]
   tags = `git tag --contains $(git rev-parse HEAD)`.split("\n")
   version = tags[0] unless tags.length > 1

@@ -32,8 +32,10 @@ task :build_check => [:check_not_in_master, :check_git_status, :check_deps_versi
 
 desc "Clone the repository"
 task :reprepro do
-  sh "reprepro -b packages/apt update"
-  sh "reprepro -b packages/apt export"
+  if File.file?('packages/apt/conf/distributions') and File.file?('packages/apt/conf/updates')
+    sh "reprepro -b packages/apt update"
+    sh "reprepro -b packages/apt export"
+  end
 end
 
 desc "Build the tarball"

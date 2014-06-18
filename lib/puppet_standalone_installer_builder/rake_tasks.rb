@@ -16,6 +16,11 @@ task :check_git_status do
   fail "You have untracked files." unless system("git ls-files --other --exclude-standard --directory")
 end
 
+desc 'Check if gem version is explicitely set'
+task :check_gem_version do
+  puts 'TODO: Check if gem version is explicitely set'
+end
+
 desc 'Check if all dependency version is explicitely set'
 task :check_deps_version do
   fixtures = YAML.load_file('.fixtures.yml')
@@ -28,7 +33,7 @@ task :check_tag do
 end
 
 desc 'Check pre-requirements'
-task :build_check => [:check_not_in_master, :check_git_status, :check_deps_version, :check_tag]
+task :build_check => [:check_not_in_master, :check_git_status, :check_gem_version, :check_deps_version, :check_tag]
 
 desc "Clone the repository"
 task :reprepro do

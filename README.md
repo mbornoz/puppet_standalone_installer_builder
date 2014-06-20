@@ -30,6 +30,12 @@ bundle exec rake build_standalone_installer
 
 This will produce a tarball a the module and all dependencies.
 
+To disable all checkes (for debugging purpose for example), you can launch:
+
+```
+bundle exec rake build_standalone_installer nocheck=true
+```
+
 Workflow for reproductible build
 --------------------------------
 

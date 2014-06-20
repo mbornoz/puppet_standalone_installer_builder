@@ -5,35 +5,41 @@ require 'yaml'
 task :default => [:help]
 
 desc 'Check if we are not working in master'
-task :check_not_in_master do
-  fail "You must work in a branch other than master." unless `git rev-parse --abbrev-ref HEAD`.strip != 'master'
+task :check_branch do
+  fail "You must work in a branch other than master." unless ENV['nocheck'] or ENV['nocheck_branch'] or `git rev-parse --abbrev-ref HEAD`.strip != 'master'
 end
 
 desc 'Check if working directory is clean'
 task :check_git_status do
-  fail "You have unstaged changes." unless system("git diff --exit-code")
-  fail "You have changes that are staged but not committed." unless system("git diff --cached --exit-code")
-  fail "You have untracked files." unless system("git ls-files --other --exclude-standard --directory")
+  if !ENV['nocheck'] and !ENV['nocheck_git_status']
+    fail "You have unstaged changes." unless system("git diff --exit-code")
+    fail "You have changes that are staged but not committed." unless system("git diff --cached --exit-code")
+    fail "You have untracked files." unless system("git ls-files --other --exclude-standard --directory")
+  end
 end
 
 desc 'Check if gem version is explicitely set'
 task :check_gem_version do
-  puts 'TODO: Check if gem version is explicitely set'
+  puts 'TODO: Check if gem version is explicitely set' unless ENV['nocheck'] or ENV['nocheck_gem_version']
 end
 
 desc 'Check if all dependency version is explicitely set'
 task :check_deps_version do
-  fixtures = YAML.load_file('.fixtures.yml')
-  fixtures['fixtures']['repositories'].select { |k, v| fail "You must explicitely set a tag ref for module #{k} in .fixtures.yml for a reproductible build." unless v.is_a?(Hash) and v.has_key?('ref') and !`git ls-remote #{v['repo']} refs/tags/#{v['ref']}`.empty? }
+  if !ENV['nocheck'] and !ENV['nocheck_deps_version']
+    fixtures = YAML.load_file('.fixtures.yml')
+    fixtures['fixtures']['repositories'].select do |k, v|
+      fail "You must explicitely set a tag ref for module #{k} in .fixtures.yml for a reproductible build." unless v.is_a?(Hash) and v.has_key?('ref') and !`git ls-remote #{v['repo']} refs/tags/#{v['ref']}`.empty?
+    end
+  end
 end
 
 desc 'Check tag'
 task :check_tag do
-  fail "You must tag the current commit for a reproductible build." unless !`git tag --contains $(git rev-parse HEAD)`.empty?
+  fail "You must tag the current commit for a reproductible build." unless ENV['nocheck'] or ENV['nocheck_tag'] or !`git tag --contains $(git rev-parse HEAD)`.empty?
 end
 
 desc 'Check pre-requirements'
-task :build_check => [:check_not_in_master, :check_git_status, :check_gem_version, :check_deps_version, :check_tag]
+task :build_check => [:check_branch, :check_git_status, :check_gem_version, :check_deps_version, :check_tag]
 
 desc "Clone the repository"
 task :reprepro do

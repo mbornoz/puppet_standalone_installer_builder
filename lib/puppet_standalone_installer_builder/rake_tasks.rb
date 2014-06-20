@@ -28,7 +28,7 @@ task :check_deps_version do
   if !ENV['nocheck'] and !ENV['nocheck_deps_version']
     fixtures = YAML.load_file('.fixtures.yml')
     fixtures['fixtures']['repositories'].select do |k, v|
-      fail "You must explicitely set a tag ref for module #{k} in .fixtures.yml for a reproductible build." unless v.is_a?(Hash) and v.has_key?('ref') and !`git ls-remote #{v['repo']} refs/tags/#{v['ref']}`.empty?
+      fail "You must explicitely set a tag or commit ref for module #{k} in .fixtures.yml for a reproductible build." unless v.is_a?(Hash) and v.has_key?('ref') and (!`git ls-remote #{v['repo']} refs/tags/#{v['ref']}`.empty? or v['ref'] =~ /^[0-9a-f]{7,40}$/)
     end
   end
 end

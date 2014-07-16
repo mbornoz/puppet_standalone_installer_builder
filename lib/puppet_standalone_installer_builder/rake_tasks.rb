@@ -29,6 +29,9 @@ task :check_deps_version do
     fixtures("repositories").each do |remote, opts|
       fail "You must explicitely set a tag or commit ref for module #{remote} in .fixtures.yml for a reproductible build." unless opts.is_a?(Hash) and opts.has_key?('ref') and (!`git ls-remote #{remote} refs/tags/#{opts['ref']}`.empty? or opts['ref'] =~ /^[0-9a-f]{7,40}$/)
     end
+    fixtures("forge_modules").each do |remote, opts|
+      fail "You must explicitely set a tag or commit ref for module #{remote} in .fixtures.yml for a reproductible build." unless opts.is_a?(Hash) and opts.has_key?('ref')
+    end
   end
 end
 

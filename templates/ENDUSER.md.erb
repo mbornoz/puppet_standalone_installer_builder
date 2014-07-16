@@ -8,7 +8,7 @@
 
 * Extract the <%= properties['profile'] %>-installer-x.x.x.tar.gz in /opt
 * Install / update Puppet if necessary
-* Create a server.pp file with the server's recipe (puppet code)
+* Optionaly create a node definition file with the server's recipe (puppet code)
 * Run puppet to apply the recipe
 
 ### Extract the installer
@@ -25,7 +25,7 @@ apt-get update
 apt-get install -y puppet
 ```
 
-### Create a node definition file
+### Create a node definition file (optional)
 
 This file is the base recipe that Puppet will use to configure the server. It's main goal is to call and setup the <%= properties['title'] %> Puppet module. You can add any Puppet code to it that will be applied to the server. An default node definition file is provided in `manifests/site.pp` (which may or may not fit to your needs).
 
@@ -77,12 +77,13 @@ It must be run as root.
 puppet apply --confdir /opt/<%= properties['profile'] %>-installer/ manifests/site.pp
 ```
 
-That's it! If you don't see any `Error:` lines it means that Puppet successfully configured the server! (some `Warning:` lines are expected)
+### That's it!
+That's it. If you don't see any `Error:` lines it means that Puppet successfully configured the server! (some `Warning:` lines are expected)
 
 If you fixed mistakes in the node definition file or want to add resources for example to configure more users or manage some other configuration using Puppet, you can rerun the puppet apply command above as many times as you want. Puppet will only apply what needs to be changed and leave the rest alone.
 
 Have fun!
 
-License
+## License
 
 This installer includes mostly Open Source software and Puppet code, but also some software and Puppet code with more restrictive licenses (e.g. the <%= properties['title'] %> Puppet module itself), which means it cannot be redistributed without prior written consent from Camptocamp SA.

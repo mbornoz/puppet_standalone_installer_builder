@@ -27,7 +27,7 @@ apt-get install -y puppet
 
 ### Create a node definition file (optional)
 
-This file is the base recipe that Puppet will use to configure the server. It's main goal is to call and setup the <%= properties['title'] %> Puppet module. You can add any Puppet code to it that will be applied to the server. An default node definition file is provided in `manifests/site.pp` (which may or may not fit to your needs).
+This file is the base recipe that Puppet will use to configure the server. It's main goal is to call and setup the <%= properties['title'] %> Puppet module. You can add any Puppet code to it that will be applied to the server. An default node definition file is provided in `manifests/default.pp` (which may or may not fit to your needs).
 
 This file must be created inside the <%= properties['profile'] %>-installer/manifests/ extracted directory and should be named 'fqdn_of_my_node.pp'.
 
@@ -74,7 +74,7 @@ This command will actually configure the server according to the node definition
 It must be run as root.
 
 ```
-puppet apply --confdir /opt/<%= properties['profile'] %>-installer/ manifests/site.pp
+puppet apply --confdir /opt/<%= properties['profile'] %>-installer/ manifests/default.pp
 ```
 
 ### That's it!

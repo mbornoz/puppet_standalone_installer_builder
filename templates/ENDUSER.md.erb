@@ -1,0 +1,88 @@
+# <%= properties['title'] %> Installer End User Documentation
+
+## What this installer does and what is included
+
+## Prerequisites
+
+## Step By Step Installation
+
+* Extract the <%= properties['profile'] %>-installer-x.x.x.tar.gz in /opt
+* Install / update Puppet if necessary
+* Create a server.pp file with the server's recipe (puppet code)
+* Run puppet to apply the recipe
+
+### Extract the installer
+
+```
+cd /opt
+tar xvzf <%= properties['profile'] %>-installer-0.1.0.tar.gz
+```
+
+### Install Puppet
+
+```
+apt-get update
+apt-get install -y puppet
+```
+
+### Create a node definition file
+
+This file is the base recipe that Puppet will use to configure the server. It's main goal is to call and setup the <%= properties['title'] %> Puppet module. You can add any Puppet code to it that will be applied to the server. An default node definition file is provided in `manifests/site.pp` (which may or may not fit to your needs).
+
+This file must be created inside the <%= properties['profile'] %>-installer/manifests/ extracted directory and should be named 'fqdn_of_my_node.pp'.
+
+When updating the installer with a newer version, you can reuse this file. You can also use the same file on multiple servers.
+
+Here is a simple template you can use, that also creates a user.
+
+```puppet
+node 'fqdn_of_my_node' {
+  # Install <%= properties['title'] %> application
+  include ::<%= properties['profile'] %>
+
+  # Configure a system user called 'mike' that can manage the <%= properties['title'] %> application
+  user {'mike':
+    ensure     => present,
+    groups     => ['sigdev'],
+    shell      => '/bin/bash',
+    managehome => true,
+  }
+  ssh_authorized_key {'mikes key on his account':
+    ensure  => present,
+    user    => 'mike',
+    type    => 'ssh-rsa',
+    key     => 'AAAAB3NzaC1kc3MAAACBAPxBNSR4YKDNmE3Mob...<usually-a-long-and-boring-string>...NSR4YK',
+  }
+  sudo::conf {'mike_can_manage_apache_service':
+    ensure  => present,
+    content => "mike ALL=(root) NOPASSWD: /usr/sbin/apachectl\n",
+  }
+  sudo::conf {'mike_can_manage_postgresql_service':
+    ensure  => present,
+    content => "mike ALL=(root) NOPASSWD: /etc/init.d/postgresql\n",
+  }
+  sudo::conf {'mike_can_run_psql_console':
+    ensure  => present,
+    content => "mike ALL=(postgres) NOPASSWD: /usr/bin/psql\n",
+  }
+}
+```
+
+### Run Puppet to apply the configuration
+
+This command will actually configure the server according to the node definition file (or default) created above.
+It must be run as root.
+
+```
+puppet apply --confdir /opt/<%= properties['profile'] %>-installer/ manifests/site.pp
+```
+
+That's it! If you don't see any `Error:` lines it means that Puppet successfully configured the server! (some `Warning:` lines are expected)
+
+If you fixed mistakes in the node definition file or want to add resources for example to configure more users or manage some other configuration using Puppet, you can rerun the puppet apply command above as many times as you want. Puppet will only apply what needs to be changed and leave the rest alone.
+
+Have fun!
+
+License
+
+This installer includes mostly Open Source software and Puppet code, but also some software and Puppet code with more restrictive licenses (e.g. the <%= properties['title'] %> Puppet module itself), which means it cannot be redistributed without prior written consent from Camptocamp SA.

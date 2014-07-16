@@ -1,6 +1,7 @@
 require 'rake'
 require 'rspec/core/rake_task'
 require 'yaml'
+require 'erb'
 
 task :default => [:help]
 
@@ -60,10 +61,16 @@ task :build_tarball => [:build_check, :reprepro, :spec_prep, :spec_standalone] d
   base_path = "#{profile}-installer"
   apt_dir = 'packages/apt'
 
+  properties = File.file?('.psib.yaml') ?  YAML.load_file('.psib.yaml') : {}
+  properties['profile'] ||= profile
+  properties['title'] ||= properties['profile']
+  template = ERB.new File.new(File.expand_path('../../../templates/ENDUSER.md.erb', __FILE__)).read, nil, "%"
+  File.open('spec/fixtures/ENDUSER.md', 'w') { |file| file.write(template.result(binding)) }
+
   readme   = 'README.md' if File.file?('README.md')
   packages = 'packages' if File.exist?('packages')
 
-  sh "tar cvzfh #{tarball} #{readme} #{packages} --exclude-from .gitignore --exclude .git --exclude #{apt_dir}/conf --exclude #{apt_dir}/lists --exclude #{apt_dir}/db -C spec/fixtures modules/ --exclude modules/#{profile}/spec/fixtures/modules --exclude modules/#{profile}/packages --transform 's,^,#{base_path}/,'"
+  sh "tar cvzfh #{tarball} #{readme} #{packages} --exclude-from .gitignore --exclude .git --exclude #{apt_dir}/conf --exclude #{apt_dir}/lists --exclude #{apt_dir}/db -C spec/fixtures ENDUSER.md manifests/ modules/ --exclude modules/#{profile}/spec/fixtures/modules --exclude modules/#{profile}/packages --transform 's,^,#{base_path}/,'"
 
   puts "Tarball of module #{profile} built in #{tarball}."
 end

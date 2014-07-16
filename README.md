@@ -44,3 +44,21 @@ Workflow for reproductible build
 * Use the same puppet modules : explicitely set dependencies version in .fixtures.yml.
 * Use the same packages : use reprepro snapshots features on your repository server, then point to a specific snapshot in your reprepro clone configuration files.
 * Call `bundle update` and `bundle exec rake build_standalone_installer` and you should get reproductible build.
+
+The .psib.yml file
+------------------
+
+You can set some properties in a `.psib.yml` file located in the root of your module:
+
+####profile:
+Override the name of the profile (defaults to the name of the current directory without the leading `puppet-`)
+
+####title:
+Override the title of the application (defaults to `profile`)
+
+Example:
+```
+---
+profile: mytestprofile
+title: My Test Profile
+```

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+REQUIRED_PUPPET_VERSION=<%= properties['min_puppet_version'] %>
+
+PUPPET=$(which puppet)
+
+if [ ! -z $PUPPET ]; then
+  INSTALLED_PUPPET_VERSION=$(puppet --version)
+else
+  INSTALLED_PUPPET_VERSION=0
+fi
+
+if [ $(echo "$INSTALLED_PUPPET_VERSION\n$REQUIRED_PUPPET_VERSION" | sort -V | head -n1) != "$REQUIRED_PUPPET_VERSION" ]; then
+  cat > /etc/apt/sources.list.d/puppet.list << EOF
+# file created by the GeoMapFish Installer
+deb [trusted=yes] file:/opt/<%= properties['profile'] %>-installer/packages/apt wheezy puppetlabs
+EOF
+
+  apt-get update
+  apt-get install -y puppet facter libaugeas-ruby1.9
+
+fi
+
+puppet apply --confdir /opt/<%= properties['profile'] %>-installer/ $@
+

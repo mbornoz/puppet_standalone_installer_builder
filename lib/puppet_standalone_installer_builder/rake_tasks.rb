@@ -68,7 +68,7 @@ task :build_tarball => [:build_check, :reprepro, :spec_prep, :spec_standalone] d
   File.open('spec/fixtures/ENDUSER.md', 'w') { |file| file.write(endusermd_template.result(binding)) }
   installsh_template = ERB.new File.new(File.expand_path('../../../templates/install.sh.erb', __FILE__)).read, nil, "%"
   Dir.mkdir('spec/fixtures/bin') unless File.exists?('spec/fixtures/bin')
-  File.open('spec/fixtures/bin/install.sh', 'w') { |file| file.write(installsh_template.result(binding)) }
+  File.open('spec/fixtures/bin/install.sh', 'w') { |file| file.write(installsh_template.result(binding)); file.chmod(0755) }
 
   readme   = 'README.md' if File.file?('README.md')
   packages = 'packages' if File.exist?('packages')

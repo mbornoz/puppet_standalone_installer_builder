@@ -2,15 +2,23 @@
 
 REQUIRED_PUPPET_VERSION=<%= properties['min_puppet_version'] %>
 
-PUPPET=$(which puppet)
+check_puppet_ver() {
+  puppet_bin=$(which puppet)
 
-if [ ! -z $PUPPET ]; then
-  INSTALLED_PUPPET_VERSION=$(puppet --version)
-else
-  INSTALLED_PUPPET_VERSION=0
-fi
+  if [ ! -z $puppet_bin ]; then
+    installed_puppet_version=$(puppet --version)
+  else
+    installed_puppet_version=0
+  fi
+  
+  if [ $(echo "$installed_puppet_version\n$REQUIRED_PUPPET_VERSION" | sort -V | head -n1) != "$REQUIRED_PUPPET_VERSION" ]; then
+    return 1 # must be installed / upgraded
+  else
+    return 0 # version is ok
+  fi
+}
 
-if [ $(echo "$INSTALLED_PUPPET_VERSION\n$REQUIRED_PUPPET_VERSION" | sort -V | head -n1) != "$REQUIRED_PUPPET_VERSION" ]; then
+install_puppet() {
   cat > /etc/apt/sources.list.d/puppet.list << EOF
 # file created by the GeoMapFish Installer
 deb [trusted=yes] file:/opt/<%= properties['profile'] %>-installer/packages/apt wheezy puppetlabs
@@ -18,8 +26,23 @@ EOF
 
   apt-get update
   apt-get install -y puppet facter libaugeas-ruby1.9
+}
 
+if [ -z "$1" ]; then
+  echo "Please pass a puppet recipe (.pp file) as argument"
+  exit 1
 fi
 
+if ! check_puppet_ver; then
+  echo "Puppet is not installed or too old. Installing..."
+  install_puppet
+
+  if ! check_puppet_ver; then
+    echo "Something went wrong during the installation! Please fix manually."
+    exit 2
+  fi
+fi
+
+echo "Running Puppet..."
 puppet apply --confdir /opt/<%= properties['profile'] %>-installer/ $@
 

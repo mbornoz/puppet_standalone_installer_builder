@@ -84,6 +84,12 @@ If you fixed mistakes in the node definition file or want to add resources for e
 
 Have fun!
 
+## Usage with existing Puppet recipes (your own Puppetmaster server)
+
+If you wish to use the Puppet recipes included in this installer with your Puppetmaster server, just copy all the included modules from the `modules/` onto your puppetmaster with your other modules, and create nodes as described above. If you already have modules with the same name but different code as those included with the installer, the `geomapfish` module might not work correctly.
+
+You will also have to manage the Debian packages included yourself to make them available to the geomapfish servers.
+
 ## License
 
 This installer includes mostly Open Source software and Puppet code, but also some software and Puppet code with more restrictive licenses (e.g. the <%= properties['title'] %> Puppet module itself), which means it cannot be redistributed without prior written consent from Camptocamp SA.

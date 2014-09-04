@@ -55,7 +55,7 @@ end
 desc "Build the tarball"
 task :build_tarball => [:build_check, :reprepro, :spec_prep, :spec_standalone] do
   profile = File.basename(Dir.pwd)[/^puppet-(.*)$/, 1]
-  tag = `git describe --tags --exact-match`
+  tag = `git describe --tags --exact-match`.strip
   version = (tag unless tag.empty?) || 'dev'
   tarball = "../#{profile}-installer-#{version}.tar.gz"
   base_path = "#{profile}-installer"

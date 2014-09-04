@@ -25,6 +25,7 @@ deb [trusted=yes] file:/opt/<%= properties['profile'] %>-installer/packages/apt 
 EOF
 
   apt-get update
+  apt-get install -y sudo
   apt-get install -y puppet facter libaugeas-ruby1.9
 }
 

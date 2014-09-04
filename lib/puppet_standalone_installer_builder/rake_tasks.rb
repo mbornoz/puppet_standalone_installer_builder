@@ -72,8 +72,9 @@ task :build_tarball => [:build_check, :reprepro, :spec_prep, :spec_standalone] d
 
   readme   = 'README.md' if File.file?('README.md')
   packages = 'packages' if File.exist?('packages')
+  examples = 'examples' if File.exist?('examples')
 
-  sh "tar cvzfh #{tarball} --owner=root --group=root #{readme} #{packages} --exclude-from .gitignore --exclude .git --exclude #{apt_dir}/conf --exclude #{apt_dir}/lists --exclude #{apt_dir}/db -C spec/fixtures ENDUSER.md bin/ manifests/ --exclude manifests/site.pp modules/ --exclude modules/#{profile}/spec/fixtures/modules --exclude modules/#{profile}/packages --transform 's,^,#{base_path}/,'"
+  sh "tar cvzfh #{tarball} --owner=root --group=root #{readme} #{packages} #{examples} --exclude-from .gitignore --exclude .git --exclude #{apt_dir}/conf --exclude #{apt_dir}/lists --exclude #{apt_dir}/db -C spec/fixtures ENDUSER.md bin/ manifests/ --exclude manifests/site.pp modules/ --exclude modules/#{profile}/spec/fixtures/modules --exclude modules/#{profile}/packages --transform 's,^,#{base_path}/,'"
 
   puts "Tarball of module #{profile} built in #{tarball}."
 end

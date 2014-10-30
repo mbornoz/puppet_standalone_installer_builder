@@ -99,7 +99,7 @@ task :build_pdf_doc => [:build_md_doc] do
     # Generate inside doc
     pdf = "#{base_doc}.pdf"
     `cd #{texdir} && pandoc -o #{pdf_inside} #{doc} \
-    --latex-engine=xelatex  --toc -H "header-includes.tex" \
+    --latex-engine=xelatex  --toc -H "header-includes.tex" -B "include-before.tex" \
     -V "lang=en" -V "mainfont=Gotham-Book" -V "documentclass=scrbook" \
     -V "classoption=open=any" -V "fontsize=10pt" -V "papersize=a4"`
 

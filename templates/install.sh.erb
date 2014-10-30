@@ -1,6 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 REQUIRED_PUPPET_VERSION=<%= properties['min_puppet_version'] %>
+BINDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+BASEDIR=$(echo ${BINDIR%/*})
 
 check_puppet_ver() {
   puppet_bin=$(which puppet)
@@ -11,7 +13,7 @@ check_puppet_ver() {
     installed_puppet_version=0
   fi
   
-  if [ $(echo "$installed_puppet_version\n$REQUIRED_PUPPET_VERSION" | sort -V | head -n1) != "$REQUIRED_PUPPET_VERSION" ]; then
+  if [ $(echo -e "$installed_puppet_version\n$REQUIRED_PUPPET_VERSION" | sort -V | head -n1) != "$REQUIRED_PUPPET_VERSION" ]; then
     return 1 # must be installed / upgraded
   else
     return 0 # version is ok
@@ -21,13 +23,22 @@ check_puppet_ver() {
 install_puppet() {
   cat > /etc/apt/sources.list.d/puppet.list << EOF
 # file created by the GeoMapFish Installer
-deb [trusted=yes] file:/opt/<%= properties['profile'] %>-installer/packages/apt wheezy puppetlabs
+deb [trusted=yes] file:${BASEDIR}/packages/apt wheezy puppetlabs
 EOF
 
   apt-get update
   apt-get install -y sudo
   apt-get install -y puppet facter libaugeas-ruby1.9
 }
+
+cat > ${BASEDIR}/hiera.yaml << EOF
+---
+:backends: yaml
+:yaml:
+  :datadir: ${BASEDIR}/hiera
+  :hierarchy: server
+  :logger: console
+EOF
 
 if [ -z "$1" ]; then
   echo "Please pass a puppet recipe (.pp file) as argument"
@@ -45,5 +56,6 @@ if ! check_puppet_ver; then
 fi
 
 echo "Running Puppet..."
-puppet apply --confdir /opt/<%= properties['profile'] %>-installer/ $@
+export FACTER_PUPPET_INSTALLER_BASEDIR=$BASEDIR
+puppet apply --confdir $BASEDIR $@
 

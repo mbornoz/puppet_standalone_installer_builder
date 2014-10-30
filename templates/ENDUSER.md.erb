@@ -6,24 +6,15 @@
 
 ## Step By Step Installation
 
-* Extract the <%= properties['profile'] %>-installer-<%= version %>.tar.gz in /opt
-* Install / update Puppet if necessary
+* Extract the `<%= properties['profile'] %>-installer-<%= version %>.tar.gz`
 * Optionaly create a node definition file with the server's recipe (puppet code)
-* Run puppet to apply the recipe
+* Run the main installation script
 
 ### Extract the installer
 
-```
-cd /opt
-tar xvzf <%= properties['profile'] %>-installer-<%= version %>.tar.gz
-```
+The location of the installer is not important, you can for example extract it in the folder `/opt`
 
-### Install Puppet
-
-```
-apt-get update
-apt-get install -y puppet
-```
+    tar xvzf <%= properties['profile'] %>-installer-<%= version %>.tar.gz
 
 ### Create a node definition file
 
@@ -33,44 +24,48 @@ When updating the installer with a newer version, you can reuse this file. You c
 
 Here is a simple template you can use or take inspiration from.
 
-```puppet
-# Define equivalent of $PATH environment variable in Puppet
-Exec { path => '/usr/bin:/usr/sbin/:/bin:/sbin:/usr/local/bin:/usr/local/sbin' }
+    # Define equivalent of $PATH environment variable in Puppet
+    Exec { path => '/usr/bin:/usr/sbin/:/bin:/sbin:/usr/local/bin:/usr/local/sbin' }
 
-# This is a simple <%= properties['title'] %> class declaration
-<%= properties['enduser_sample_declaration'] %>
+    # This is a simple <%= properties['title'] %> class declaration 
+    <%= properties['enduser_sample_declaration'] %>
 
-# Configure a system user called 'mike' for an application developper
-user {'mike':
-  ensure     => present,
-  groups     => ['sigdev'],
-  shell      => '/bin/bash',
-  managehome => true,
-}
-ssh_authorized_key {'mikes key on his account':
-  ensure  => present,
-  user    => 'mike',
-  type    => 'ssh-rsa',
-  key     => 'AAAAB3NzaC1kc3MAAACBAPxBNSR4YKDNmE3Mob...<usually-a-long-and-boring-string>...NSR4YK',
-}
-```
+    # Configure a system user called 'mike' for an application developper
+    user {'mike':
+      ensure     => present,
+      groups     => ['sigdev'],
+      shell      => '/bin/bash',
+      managehome => true,
+    }
 
-Checkout out the README.md file included with the installer for a complete documentation of the <%= properties['profile'] %> class and the official Puppet documentation at https://docs.puppetlabs.com/puppet to learn more about writing Puppet code.
+    ssh_authorized_key {'mikes key on his account':
+      ensure  => present,
+      user    => 'mike',
+      type    => 'ssh-rsa',
+      key     => 'AAAAB3NzaC1kc3MAAACBAPxBNSR4YKDNmE3Mob...<usually-a-long-and-boring-string>...NSR4YK',
+    }
 
-### Run Puppet to apply the configuration
+Checkout out the README.pdf file included with the installer for a complete documentation of the <%= properties['profile'] %> class and the [official Puppet documentation](https://docs.puppetlabs.com/puppet) to learn more about writing Puppet code.
 
-This command will actually configure the server according to the node definition file created above. It must be run as root.
+### Run the installation script
 
-```
-puppet apply --confdir /opt/<%= properties['profile'] %>-installer/ server.pp
-```
+This script will update Puppet if necessary and run Puppet with the good arguments. It must be run as root.
+
+    /opt/<%= properties['profile'] %>-installer/bin/install.sh server.pp
 
 ### That's it!
+
 That's it. If you don't see any `Error:` lines it means that Puppet successfully configured the server! (some `Warning:` lines are expected)
 
-If you fixed mistakes in the node definition file or want to add resources for example to configure more users or manage some other configuration using Puppet, you can rerun the puppet apply command above as many times as you want. Puppet will only apply what needs to be changed and leave the rest alone.
+If you fixed mistakes in the node definition file or want to add resources for example to configure more users or manage some other configuration using Puppet, you can rerun the installation script above as many times as you want. Puppet will only apply what needs to be changed and leave the rest alone.
 
 Have fun!
+
+## Automatic Parameter Lookup
+
+Puppet can automatically retrieve class parameters from Hiera. This means that you can assign values to optional class parameters not explicitly set in the declarations.
+
+For this, you just have to create the directory in which to find hiera data and a simple data source called server.yaml to put your entries. A basic hiera configuration file is automatically created at the root of the installer as described in the [official Hiera documentation](https://docs.puppetlabs.com/hiera/1/).
 
 ## Usage with existing Puppet recipes (your own Puppetmaster server)
 

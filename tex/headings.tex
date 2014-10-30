@@ -1,0 +1,13 @@
+% Number all levels down to subsections
+\setcounter{secnumdepth}{2}
+
+% Text is set in 10pt
+\setkomafont{chapter}{\color{c2c}\Large\chapfont\uppercase} % 15pt in LibreOffice
+\setkomafont{section}{\color{c2c}\large\secfont\uppercase}  % 12pt in LibreOffice
+\setkomafont{subsection}{\large\normalfont}                 % 12pt in LibreOffice
+\setkomafont{subsubsection}{\normalsize\normalfont}         % 10pt in LibreOffice
+
+% Put section numbers in margin, see scrguien p.100
+\renewcommand*{\othersectionlevelsformat}[3]{%
+  \makebox[0pt][r]{%
+    #3\autodot\enskip}}

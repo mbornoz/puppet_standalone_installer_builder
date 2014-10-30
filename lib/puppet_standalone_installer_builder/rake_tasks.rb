@@ -74,8 +74,13 @@ task :build_pdf_doc => [:build_md_doc] do
     f.write("\\newcommand{\\docversion}{#{version}\n")
   end
 
-  ['README', 'ENDUSER'].each do |doc|
-    `cd #{texdir} && pandoc -o #{doc}.pdf #{doc}.md \
+  docs = []
+  docs << File.expand_path('README.md') if File.file?('README.md')
+  docs << File.expand_path('spec/fixtures/ENDUSER.md')
+
+  docs.each do |doc|
+    pdf_doc = doc.gsub(/\.md$/, '.pdf')
+    `cd #{texdir} && pandoc -o #{pdf_doc} #{doc} \
     --latex-engine=xelatex  --toc -H "header-includes.tex" \
     -V "lang=en" -V "mainfont=Gotham-Book" -V "documentclass=scrbook" \
     -V "classoption=open=any" -V "fontsize=10pt" -V "papersize=a4"`

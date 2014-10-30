@@ -80,7 +80,7 @@ task :build_pdf_doc => [:build_md_doc] do
   `git clone https://github.com/camptocamp/unoconv.git`
 
   ott = File.expand_path('../../../templates/template_document_v2.2.ott', __FILE__)
-  unoconv_cmd= "python3 $(COMMON_DIR)/unoconv/unoconv -f pdf \
+  unoconv_cmd= "python3 unoconv/unoconv -f pdf \
 	 	-F Client_Name=\"#{properties['title']}\" \
 	 	-F Document_Title=\"\" \
 	 	-F Document_Last_Version=\"#{version}\" \

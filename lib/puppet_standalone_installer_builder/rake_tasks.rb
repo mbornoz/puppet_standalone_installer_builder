@@ -58,6 +58,8 @@ task :build_md_doc do
   properties = File.file?('.psib.yaml') ?  YAML.load_file('.psib.yaml') : {}
   properties['profile'] ||= profile
   properties['title'] ||= properties['profile']
+  tag = `git describe --tags --exact-match`.strip
+  version = (tag unless tag.empty?) || 'dev'
 
   endusermd_template = ERB.new File.new(File.expand_path('../../../templates/ENDUSER.md.erb', __FILE__)).read, nil, "%"
   File.open('spec/fixtures/ENDUSER.md', 'w') { |file| file.write(endusermd_template.result(binding)) }

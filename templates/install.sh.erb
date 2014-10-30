@@ -56,6 +56,6 @@ if ! check_puppet_ver; then
 fi
 
 echo "Running Puppet..."
-export FACTER_PUPPET_INSTALLER_BASEDIR=$BASEDIR
+export FACTER_puppet_installer_basedir=$BASEDIR
 puppet apply --confdir $BASEDIR $@
 

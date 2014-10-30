@@ -69,11 +69,11 @@ desc "Build pdf doc"
 task :build_pdf_doc => [:build_md_doc] do
   tag = `git describe --tags --exact-match`.strip
   version = (tag unless tag.empty?) || 'dev'
-  File.open('tex/docversion.tex', 'w') do
+  texdir = File.expand_path('../../../tex')
+  File.open(File.join(texdir, 'docversion.tex'), 'w') do
     f.write("\\newcommand{\\docversion}{#{version}\n")
   end
 
-  texdir = File.expand_path('../../../tex')
   ['README', 'ENDUSER'].each do |doc|
     `cd #{texdir} && pandoc -o #{doc}.pdf #{doc}.md \
     --latex-engine=xelatex  --toc -H "header-includes.tex" \

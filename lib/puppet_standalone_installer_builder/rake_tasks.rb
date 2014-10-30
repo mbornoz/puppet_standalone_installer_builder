@@ -67,6 +67,7 @@ end
 
 desc "Build pdf doc"
 task :build_pdf_doc => [:build_md_doc] do
+  properties = File.file?('.psib.yaml') ?  YAML.load_file('.psib.yaml') : {}
   tag = `git describe --tags --exact-match`.strip
   version = (tag unless tag.empty?) || 'dev'
   texdir = File.expand_path('../../../tex', __FILE__)

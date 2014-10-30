@@ -78,12 +78,31 @@ task :build_pdf_doc => [:build_md_doc] do
   docs << File.expand_path('README.md') if File.file?('README.md')
   docs << File.expand_path('spec/fixtures/ENDUSER.md')
 
+  ott = File.expand_path('../../../templates/template_document_v2.2.ott', __FILE__)
+  unoconv_cmd= "python3 $(COMMON_DIR)/unoconv/unoconv -f pdf \
+	 	-F Client_Name=\"#{properties['title']}\" \
+	 	-F Document_Title=\"\" \
+	 	-F Document_Last_Version=\"#{version}\" \
+		-F Document_Date=\"\" \
+	 	--stdout"
+
   docs.each do |doc|
-    pdf_doc = doc.gsub(/\.md$/, '.pdf')
-    `cd #{texdir} && pandoc -o #{pdf_doc} #{doc} \
+    base_doc = doc.gsub(/\.md$/, '')
+    pdf_inside = "#{base_doc}_inside.pdf"
+    pdf_cover = "#{base_doc}_cover.pdf"
+
+    # Generate inside doc
+    pdf = "#{base_doc}.pdf"
+    `cd #{texdir} && pandoc -o #{pdf_inside} #{doc} \
     --latex-engine=xelatex  --toc -H "header-includes.tex" \
     -V "lang=en" -V "mainfont=Gotham-Book" -V "documentclass=scrbook" \
     -V "classoption=open=any" -V "fontsize=10pt" -V "papersize=a4"`
+
+    # Generate cover
+    `#{unoconv_cmd} -F Document_Type="#{properties['title']}" "#{ott}" | pdftk - cat 1 end output "#{pdf_cover}"`
+
+    # Assemble PDF
+    `pdftk A="#{pdf_inside}" B="#{pdf_cover}" cat A1 B A2 output "#{pdf}"`
   end
 end
 

@@ -54,6 +54,7 @@ end
 
 desc "Build md doc"
 task :build_md_doc do
+  profile = File.basename(Dir.pwd)[/^puppet-(.*)$/, 1]
   properties = File.file?('.psib.yaml') ?  YAML.load_file('.psib.yaml') : {}
   properties['profile'] ||= profile
   properties['title'] ||= properties['profile']
@@ -64,7 +65,6 @@ end
 
 desc "Build pdf doc"
 task :build_pdf_doc => [:build_md_doc] do
-  profile = File.basename(Dir.pwd)[/^puppet-(.*)$/, 1]
   tag = `git describe --tags --exact-match`.strip
   version = (tag unless tag.empty?) || 'dev'
   File.open('tex/docversion.tex', 'w') do

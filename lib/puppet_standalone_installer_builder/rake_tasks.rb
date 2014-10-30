@@ -52,8 +52,72 @@ task :reprepro do
   end
 end
 
+desc "Build md doc"
+task :build_md_doc do
+  profile = File.basename(Dir.pwd)[/^puppet-(.*)$/, 1]
+  properties = File.file?('.psib.yaml') ?  YAML.load_file('.psib.yaml') : {}
+  properties['profile'] ||= profile
+  properties['title'] ||= properties['profile']
+  tag = `git describe --tags --exact-match`.strip
+  version = (tag unless tag.empty?) || 'dev'
+
+  endusermd_template = ERB.new File.new(File.expand_path('../../../templates/ENDUSER.md.erb', __FILE__)).read, nil, "%"
+  File.open('spec/fixtures/ENDUSER.md', 'w') { |file| file.write(endusermd_template.result(binding)) }
+end
+
+desc "Build pdf doc"
+task :build_pdf_doc => [:build_md_doc] do
+  properties = File.file?('.psib.yaml') ?  YAML.load_file('.psib.yaml') : {}
+  tag = `git describe --tags --exact-match`.strip
+  version = (tag unless tag.empty?) || 'dev'
+  texdir = File.expand_path('../../../tex', __FILE__)
+  File.open(File.join(texdir, 'docversion.tex'), 'w') do |f|
+    f.write("\\newcommand{\\docversion}{#{version}}\n")
+  end
+
+  # Get forked unoconv
+  puts "Forking unoconv"
+  `git clone https://github.com/camptocamp/unoconv.git`
+
+  ott = File.expand_path('../../../templates/template_document_v2.2.ott', __FILE__)
+  # LibreOffice has this weird date format
+  date_today = `date +%s`.to_i
+  # Edge effect (2 days off)?
+  date_1900 = `date -d'12/30/1899' +%s`.to_i
+  date_uno = (date_today - date_1900)/86400
+  unoconv_cmd= "python3 unoconv/unoconv -f pdf \
+	 	-F Client_Name=\"#{properties['client_name']}\" \
+	 	-F Document_Last_Version=\"#{version}\" \
+		-F Document_Date=\"#{date_uno}\" \
+	 	--stdout"
+
+  docs = []
+  docs << { :file => File.expand_path('README.md'), :title => 'Module README' } if File.file?('README.md')
+  docs << { :file => File.expand_path('spec/fixtures/ENDUSER.md'), :title => 'End-User Documentation' }
+
+  docs.each do |doc|
+    base_doc = doc[:file].gsub(/\.md$/, '')
+    pdf_inside = "#{base_doc}_inside.pdf"
+    pdf_cover = "#{base_doc}_cover.pdf"
+
+    # Generate inside doc
+    pdf = "#{base_doc}.pdf"
+    `cd #{texdir} && pandoc -o #{pdf_inside} #{doc[:file]} \
+    --latex-engine=xelatex  --toc -H "header-includes.tex" -B "include-before.tex" \
+    -V "lang=en" -V "mainfont=Gotham-Book" -V "documentclass=scrbook" \
+    -V "classoption=open=any" -V "classoption=DIV=14" -V "fontsize=10pt" -V "papersize=a4"`
+
+    # Generate cover
+    puts "Executing '`#{unoconv_cmd} -F Document_Type=\"#{properties['title']}\" \"#{ott}\" | pdftk - cat 1 end output \"#{pdf_cover}\"`'"
+    `#{unoconv_cmd} -F Document_Type="#{properties['title']}" -F Document_Title=\"#{doc[:title]}\" "#{ott}" | pdftk - cat 1 end output "#{pdf_cover}"`
+
+    # Assemble PDF
+    `pdftk A="#{pdf_cover}" B="#{pdf_inside}" cat A1 B A2 output "#{pdf}"`
+  end
+end
+
 desc "Build the tarball"
-task :build_tarball => [:build_check, :reprepro, :spec_prep, :spec_standalone] do
+task :build_tarball => [:build_check, :reprepro, :spec_prep, :spec_standalone, :build_pdf_doc] do
   profile = File.basename(Dir.pwd)[/^puppet-(.*)$/, 1]
   tag = `git describe --tags --exact-match`.strip
   version = (tag unless tag.empty?) || 'dev'
@@ -64,17 +128,15 @@ task :build_tarball => [:build_check, :reprepro, :spec_prep, :spec_standalone] d
   properties = File.file?('.psib.yaml') ?  YAML.load_file('.psib.yaml') : {}
   properties['profile'] ||= profile
   properties['title'] ||= properties['profile']
-  endusermd_template = ERB.new File.new(File.expand_path('../../../templates/ENDUSER.md.erb', __FILE__)).read, nil, "%"
-  File.open('spec/fixtures/ENDUSER.md', 'w') { |file| file.write(endusermd_template.result(binding)) }
   installsh_template = ERB.new File.new(File.expand_path('../../../templates/install.sh.erb', __FILE__)).read, nil, "%"
   Dir.mkdir('spec/fixtures/bin') unless File.exists?('spec/fixtures/bin')
   File.open('spec/fixtures/bin/install.sh', 'w') { |file| file.write(installsh_template.result(binding)); file.chmod(0755) }
 
-  readme   = 'README.md' if File.file?('README.md')
+  readme   = 'README.pdf' if File.file?('README.pdf')
   packages = 'packages' if File.exist?('packages')
   examples = 'examples' if File.exist?('examples')
 
-  sh "tar cvzfh #{tarball} --owner=root --group=root #{readme} #{packages} #{examples} --exclude-from .gitignore --exclude .git --exclude #{apt_dir}/conf --exclude #{apt_dir}/lists --exclude #{apt_dir}/db -C spec/fixtures ENDUSER.md bin/ manifests/ --exclude manifests/site.pp modules/ --exclude modules/#{profile}/spec/fixtures/modules --exclude modules/#{profile}/packages --transform 's,^,#{base_path}/,'"
+  sh "tar cvzfh #{tarball} --owner=root --group=root #{readme} #{packages} #{examples} --exclude-from .gitignore --exclude .git --exclude #{apt_dir}/conf --exclude #{apt_dir}/lists --exclude #{apt_dir}/db -C spec/fixtures ENDUSER.pdf bin/ manifests/ --exclude manifests/site.pp modules/ --exclude modules/#{profile}/spec/fixtures/modules --exclude modules/#{profile}/packages --transform 's,^,#{base_path}/,'"
 
   puts "Tarball of module #{profile} built in #{tarball}."
 end

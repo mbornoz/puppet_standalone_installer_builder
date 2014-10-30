@@ -5,9 +5,17 @@
 \addtokomafont{footsepline}{\color{c2c}}
 \KOMAoptions{headsepline=0.1pt:\textwidth,footsepline=0.1pt:\textwidth}
 
-\newcommand{\ctoclogo}{\includegraphics[width=12em]{camptocamp.png}}
-\newcommand{\ctocinfralogo}{\includegraphics[width=12em]{rapport_logo_haut_droite_infrastructure_rgb.png}}
+\newcommand{\ctoclogo}{\includegraphics[width=15em]{camptocamp.png}}
+\newcommand{\ctocinfralogo}{\includegraphics[width=15em]{rapport_logo_haut_droite_infrastructure_rgb.png}}
 \newcommand{\ctocinfraheader}{\ctoclogo\hfill{}\ctocinfralogo}
+
+% Setup date for \today
+\usepackage[ddmmyyyy]{datetime}
+\renewcommand{\dateseparator}{.}
+
+\newcommand{\footerstyle}{\color{c2c}\normalfont\scriptsize}
+\newcommand{\ctoccopyright}{\textbf{\copyright Camptocamp 2014} /  V\docversion{} / \today}
+\newcommand{\pagenum}{\pagemark/\pageref{LastPage}}
 
 \defpagestyle{c2c}%
   {%
@@ -16,8 +24,8 @@
     {}
   }%
   {%
-    {\color{c2c}\textrm\copyright Camptocamp 2014 / VX.X / DATE\hfill\pagemark/\pageref{LastPage}}
-    {\color{c2c}\textrm\pagemark/\pageref{LastPage}\hfill{}\copyright Camptocamp 2014 / VX.X / DATE}
+    {\footerstyle\pagenum\hfill\ctoccopyright}
+    {\footerstyle\ctoccopyright\hfill\pagenum}
     {}
   } % Nothing in footer
 

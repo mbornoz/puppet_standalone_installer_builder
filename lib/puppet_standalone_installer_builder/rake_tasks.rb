@@ -71,7 +71,7 @@ task :build_pdf_doc => [:build_md_doc] do
   version = (tag unless tag.empty?) || 'dev'
   texdir = File.expand_path('../../../tex', __FILE__)
   File.open(File.join(texdir, 'docversion.tex'), 'w') do |f|
-    f.write("\\newcommand{\\docversion}{#{version}\n")
+    f.write("\\newcommand{\\docversion}{#{version}}\n")
   end
 
   docs = []

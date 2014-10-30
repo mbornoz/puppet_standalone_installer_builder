@@ -106,7 +106,7 @@ task :build_pdf_doc => [:build_md_doc] do
     `cd #{texdir} && pandoc -o #{pdf_inside} #{doc} \
     --latex-engine=xelatex  --toc -H "header-includes.tex" -B "include-before.tex" \
     -V "lang=en" -V "mainfont=Gotham-Book" -V "documentclass=scrbook" \
-    -V "classoption=open=any" -V "fontsize=10pt" -V "papersize=a4"`
+    -V "classoption=open=any" -V "classoption=DIV=14" -V "fontsize=10pt" -V "papersize=a4"`
 
     # Generate cover
     puts "Executing '`#{unoconv_cmd} -F Document_Type=\"#{properties['title']}\" \"#{ott}\" | pdftk - cat 1 end output \"#{pdf_cover}\"`'"

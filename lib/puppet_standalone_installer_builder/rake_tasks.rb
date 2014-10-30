@@ -104,6 +104,7 @@ task :build_pdf_doc => [:build_md_doc] do
     -V "classoption=open=any" -V "fontsize=10pt" -V "papersize=a4"`
 
     # Generate cover
+    puts "Executing '`#{unoconv_cmd} -F Document_Type=\"#{properties['title']}\" \"#{ott}\" | pdftk - cat 1 end output \"#{pdf_cover}\"`'"
     `#{unoconv_cmd} -F Document_Type="#{properties['title']}" "#{ott}" | pdftk - cat 1 end output "#{pdf_cover}"`
 
     # Assemble PDF

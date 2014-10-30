@@ -80,11 +80,16 @@ task :build_pdf_doc => [:build_md_doc] do
   `git clone https://github.com/camptocamp/unoconv.git`
 
   ott = File.expand_path('../../../templates/template_document_v2.2.ott', __FILE__)
+  # LibreOffice has this weird date format
+  date_today = `date +%s`.to_i
+  # Edge effect (2 days off)?
+  date_1900 = `date -d'12/30/1899' +%s`.to_i
+  date_uno = (date_today - date_1900)/86400
   unoconv_cmd= "python3 unoconv/unoconv -f pdf \
 	 	-F Client_Name=\"#{properties['title']}\" \
 	 	-F Document_Title=\"\" \
 	 	-F Document_Last_Version=\"#{version}\" \
-		-F Document_Date=\"\" \
+		-F Document_Date=\"#{date_uno}\" \
 	 	--stdout"
 
   docs = []

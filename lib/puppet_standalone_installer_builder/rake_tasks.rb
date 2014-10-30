@@ -109,7 +109,7 @@ task :build_pdf_doc => [:build_md_doc] do
 
     # Generate cover
     puts "Executing '`#{unoconv_cmd} -F Document_Type=\"#{properties['title']}\" \"#{ott}\" | pdftk - cat 1 end output \"#{pdf_cover}\"`'"
-    `#{unoconv_cmd} -F Document_Type="#{properties['title']}" -F Document_Title=\"#{title}\" "#{ott}" | pdftk - cat 1 end output "#{pdf_cover}"`
+    `#{unoconv_cmd} -F Document_Type="#{properties['title']}" -F Document_Title=\"#{doc[:title]}\" "#{ott}" | pdftk - cat 1 end output "#{pdf_cover}"`
 
     # Assemble PDF
     `pdftk A="#{pdf_cover}" B="#{pdf_inside}" cat A1 B A2 output "#{pdf}"`

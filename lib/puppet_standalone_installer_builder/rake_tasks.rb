@@ -52,8 +52,35 @@ task :reprepro do
   end
 end
 
+desc "Build md doc"
+task :build_md_doc do
+  properties = File.file?('.psib.yaml') ?  YAML.load_file('.psib.yaml') : {}
+  properties['profile'] ||= profile
+  properties['title'] ||= properties['profile']
+
+  endusermd_template = ERB.new File.new(File.expand_path('../../../templates/ENDUSER.md.erb', __FILE__)).read, nil, "%"
+  File.open('spec/fixtures/ENDUSER.md', 'w') { |file| file.write(endusermd_template.result(binding)) }
+end
+
+desc "Build pdf doc"
+task :build_pdf_doc => [:build_md_doc] do
+  tag = `git describe --tags --exact-match`.strip
+  version = (tag unless tag.empty?) || 'dev'
+  File.open('tex/docversion.tex', 'w') do
+    f.write("\\newcommand{\\docversion}{#{version}\n")
+  end
+
+  texdir = File.expand_path('../../../tex')
+  ['README', 'ENDUSER'].each do |doc|
+    `cd #{texdir} && pandoc -o #{doc}.pdf #{doc}.md \
+    --latex-engine=xelatex  --toc -H "header-includes.tex" \
+    -V "lang=en" -V "mainfont=Gotham-Book" -V "documentclass=scrbook" \
+    -V "classoption=open=any" -V "fontsize=10pt" -V "papersize=a4"`
+  end
+end
+
 desc "Build the tarball"
-task :build_tarball => [:build_check, :reprepro, :spec_prep, :spec_standalone] do
+task :build_tarball => [:build_check, :reprepro, :spec_prep, :spec_standalone, :build_pdf_doc] do
   profile = File.basename(Dir.pwd)[/^puppet-(.*)$/, 1]
   tag = `git describe --tags --exact-match`.strip
   version = (tag unless tag.empty?) || 'dev'
@@ -64,17 +91,15 @@ task :build_tarball => [:build_check, :reprepro, :spec_prep, :spec_standalone] d
   properties = File.file?('.psib.yaml') ?  YAML.load_file('.psib.yaml') : {}
   properties['profile'] ||= profile
   properties['title'] ||= properties['profile']
-  endusermd_template = ERB.new File.new(File.expand_path('../../../templates/ENDUSER.md.erb', __FILE__)).read, nil, "%"
-  File.open('spec/fixtures/ENDUSER.md', 'w') { |file| file.write(endusermd_template.result(binding)) }
   installsh_template = ERB.new File.new(File.expand_path('../../../templates/install.sh.erb', __FILE__)).read, nil, "%"
   Dir.mkdir('spec/fixtures/bin') unless File.exists?('spec/fixtures/bin')
   File.open('spec/fixtures/bin/install.sh', 'w') { |file| file.write(installsh_template.result(binding)); file.chmod(0755) }
 
-  readme   = 'README.md' if File.file?('README.md')
+  readme   = 'README.pdf' if File.file?('README.pdf')
   packages = 'packages' if File.exist?('packages')
   examples = 'examples' if File.exist?('examples')
 
-  sh "tar cvzfh #{tarball} --owner=root --group=root #{readme} #{packages} #{examples} --exclude-from .gitignore --exclude .git --exclude #{apt_dir}/conf --exclude #{apt_dir}/lists --exclude #{apt_dir}/db -C spec/fixtures ENDUSER.md bin/ manifests/ --exclude manifests/site.pp modules/ --exclude modules/#{profile}/spec/fixtures/modules --exclude modules/#{profile}/packages --transform 's,^,#{base_path}/,'"
+  sh "tar cvzfh #{tarball} --owner=root --group=root #{readme} #{packages} #{examples} --exclude-from .gitignore --exclude .git --exclude #{apt_dir}/conf --exclude #{apt_dir}/lists --exclude #{apt_dir}/db -C spec/fixtures ENDUSER.pdf bin/ manifests/ --exclude manifests/site.pp modules/ --exclude modules/#{profile}/spec/fixtures/modules --exclude modules/#{profile}/packages --transform 's,^,#{base_path}/,'"
 
   puts "Tarball of module #{profile} built in #{tarball}."
 end

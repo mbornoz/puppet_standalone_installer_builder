@@ -75,9 +75,9 @@ task :build_pdf_doc => [:build_md_doc] do
     f.write("\\newcommand{\\docversion}{#{version}}\n")
   end
 
-  docs = []
-  docs << File.expand_path('README.md') if File.file?('README.md')
-  docs << File.expand_path('spec/fixtures/ENDUSER.md')
+  # Get forked unoconv
+  puts "Forking unoconv"
+  `git clone https://github.com/camptocamp/unoconv.git`
 
   ott = File.expand_path('../../../templates/template_document_v2.2.ott', __FILE__)
   unoconv_cmd= "python3 $(COMMON_DIR)/unoconv/unoconv -f pdf \
@@ -86,6 +86,10 @@ task :build_pdf_doc => [:build_md_doc] do
 	 	-F Document_Last_Version=\"#{version}\" \
 		-F Document_Date=\"\" \
 	 	--stdout"
+
+  docs = []
+  docs << File.expand_path('README.md') if File.file?('README.md')
+  docs << File.expand_path('spec/fixtures/ENDUSER.md')
 
   docs.each do |doc|
     base_doc = doc.gsub(/\.md$/, '')

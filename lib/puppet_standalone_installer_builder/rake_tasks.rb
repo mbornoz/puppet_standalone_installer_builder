@@ -80,12 +80,6 @@ task :build_pdf_doc => [:build_md_doc] do
 
   docs.each do |doc|
     pdf_doc = doc.gsub(/\.md$/, '.pdf')
-    puts "Executing '
-    `cd #{texdir} && pandoc -o #{pdf_doc} #{doc} \
-    --latex-engine=xelatex  --toc -H \"header-includes.tex\" \
-    -V \"lang=en\" -V \"mainfont=Gotham-Book\" -V \"documentclass=scrbook\" \
-    -V \"classoption=open=any\" -V \"fontsize=10pt\" -V \"papersize=a4\"`
-    '"
     `cd #{texdir} && pandoc -o #{pdf_doc} #{doc} \
     --latex-engine=xelatex  --toc -H "header-includes.tex" \
     -V "lang=en" -V "mainfont=Gotham-Book" -V "documentclass=scrbook" \

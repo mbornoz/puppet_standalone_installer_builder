@@ -69,7 +69,7 @@ desc "Build pdf doc"
 task :build_pdf_doc => [:build_md_doc] do
   tag = `git describe --tags --exact-match`.strip
   version = (tag unless tag.empty?) || 'dev'
-  texdir = File.expand_path('../../../tex')
+  texdir = File.expand_path('../../../tex', __FILE__)
   File.open(File.join(texdir, 'docversion.tex'), 'w') do
     f.write("\\newcommand{\\docversion}{#{version}\n")
   end
